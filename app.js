@@ -8,16 +8,16 @@ const worker = new TesseractWorker();
 // Storage
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "./uploads");
+    cb(null, "./uploads"); //initializing the destination folder for the uploaded image
   },
   filename: (req, file, cb) => {
-    cb(null, file.originalname);
+    cb(null, file.originalname); // setting up the file name for the uploaded image
   }
 });
 
-const upload = multer({ storage: storage }).single("avatar");
+const upload = multer({ storage: storage }).single("avatar"); // assigning the storage functionality
 
-app.set("view engine", "ejs");
+app.set("view engine", "ejs"); // setting up the engine for EJS
 
 // Routes
 
@@ -27,18 +27,19 @@ app.get("/", (req, res) => {
 
 app.post("/upload", (req, res) => {
   upload(req, res, err => {
+    // reading and analyzimg the uploaded file
     fs.readFile(`./uploads/${req.file.originalname}`, (err, data) => {
       if (err) return console.log(err);
 
       worker
-        .recognize(data, "eng", { tessjs_create_pdf: "1" })
+        .recognize(data, "eng", { tessjs_create_pdf: "1" }) // analyze the file and send it back generating the pdf
         .progress(progress => {
-          console.log(progress);
+          console.log(progress); // monitoring the progress
         })
         .then(result => {
           res.redirect("/download");
         })
-        .finally(() => worker.terminate());
+        .finally(() => worker.terminate()); // Ending worker
     });
   });
 });
